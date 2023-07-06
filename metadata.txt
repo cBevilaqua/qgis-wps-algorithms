@@ -1,0 +1,5 @@
+[general]
+name=ZooxAlgos
+qgisMinimumVersion=3.10
+qgisMaximumVersion=3.99
+wps=True
