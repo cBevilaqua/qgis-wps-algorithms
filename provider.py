@@ -2,6 +2,7 @@ from qgis.core import QgsApplication, QgsProcessingProvider
 from .buffer import BufferAlgorithm
 from .intersection import IntersectionAlgorithm
 from .dissolve import DissolveAlgorithm
+from .difference import DifferenceAlgorithm
 
 
 class Provider(QgsProcessingProvider):
@@ -17,6 +18,7 @@ class Provider(QgsProcessingProvider):
             BufferAlgorithm(),
             IntersectionAlgorithm(),
             DissolveAlgorithm(),
+            DifferenceAlgorithm(),
         ]
         return algs
 

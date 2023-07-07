@@ -1,6 +1,6 @@
-"""Intersection
+"""Difference
 
-https://docs.qgis.org/3.28/en/docs/user_manual/processing_algs/qgis/vectoroverlay.html#intersection
+https://docs.qgis.org/3.28/en/docs/user_manual/processing_algs/qgis/vectoroverlay.html#difference
 """
 
 from qgis.PyQt.QtCore import QCoreApplication
@@ -13,12 +13,13 @@ from qgis.core import (
     QgsProcessingParameterFeatureSource,
     QgsProcessingParameterVectorDestination,
     QgsProcessingParameterRasterDestination,
+    QgsProcessingParameterField,
     QgsFeatureRequest,
 )
 from qgis import processing
 
 
-class IntersectionAlgorithm(QgsProcessingAlgorithm):
+class DifferenceAlgorithm(QgsProcessingAlgorithm):
     """
     This is an example algorithm that takes a vector layer,
     creates some new layers and returns some results.
@@ -38,19 +39,19 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         # Must return a new copy of your algorithm.
-        return IntersectionAlgorithm()
+        return DifferenceAlgorithm()
 
     def name(self):
         """
         Returns the unique algorithm name.
         """
-        return "intersection"
+        return "difference"
 
     def displayName(self):
         """
         Returns the translated algorithm name.
         """
-        return self.tr("Intersection")
+        return self.tr("Difference")
 
     def group(self):
         """
@@ -69,7 +70,7 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
         """
         Returns a localised short help string for the algorithm.
         """
-        return self.tr("Qgis intersection")
+        return self.tr("Qgis difference")
 
     def initAlgorithm(self, config=None):
         """
@@ -100,28 +101,13 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        """
         self.addParameter(
-            QgsProcessingParameterDistance(
-                "BUFFERDIST",
-                self.tr("BUFFERDIST"),
-                defaultValue=1.0,
-                # Make distance units match the INPUT layer units:
-                parentParameterName="INPUT",
+            QgsProcessingParameterVectorDestination(
+                "OUTPUT",
+                self.tr("Intersection output"),
             )
         )
-        """
 
-        """
-        self.addParameter(
-            QgsProcessingParameterDistance(
-                "CELLSIZE",
-                self.tr("CELLSIZE"),
-                defaultValue=10.0,
-                parentParameterName="INPUT",
-            )
-        )
-        """
         self.addOutput(
             QgsProcessingOutputNumber(
                 "NUMBEROFFEATURES", self.tr("Number of features processed")
@@ -137,10 +123,7 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
         # parameter, so it is retrieved by calling
         # self.parameterAsSource.
         input_featuresource = self.parameterAsSource(parameters, "INPUT", context)
-        overlay_featuresource = self.parameterAsSource(parameters, "OVERLAY", context)
         numfeatures = input_featuresource.featureCount()
-        overlayfeatures = overlay_featuresource.featureCount()
-        totalfeatures = numfeatures + overlayfeatures
 
         # Retrieve the buffer distance and raster cell size numeric
         # values. Since these are numeric values, they are retrieved
@@ -154,13 +137,15 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
         # to ignore invalid features
         context.setInvalidGeometryCheck(QgsFeatureRequest.GeometryNoCheck)
 
+        params = {
+            "INPUT": parameters["INPUT"],
+            "OVERLAY": parameters["OVERLAY"],
+            "OUTPUT": parameters["OUTPUT"],
+        }
+
         result = processing.run(
-            "qgis:intersection",
-            {
-                "INPUT": parameters["INPUT"],
-                "OVERLAY": parameters["OVERLAY"],
-                "OUTPUT": parameters["OUTPUT"],
-            },
+            "qgis:difference",
+            params,
             # Because the buffer algorithm is being run as a step in
             # another larger algorithm, the is_child_algorithm option
             # should be set to True
@@ -180,5 +165,5 @@ class IntersectionAlgorithm(QgsProcessingAlgorithm):
         # Return the results
         return {
             "OUTPUT": result["OUTPUT"],
-            "NUMBEROFFEATURES": totalfeatures,
+            "NUMBEROFFEATURES": numfeatures,
         }
