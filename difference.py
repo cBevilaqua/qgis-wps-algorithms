@@ -101,13 +101,6 @@ class DifferenceAlgorithm(QgsProcessingAlgorithm):
             )
         )
 
-        self.addParameter(
-            QgsProcessingParameterVectorDestination(
-                "OUTPUT",
-                self.tr("Intersection output"),
-            )
-        )
-
         self.addOutput(
             QgsProcessingOutputNumber(
                 "NUMBEROFFEATURES", self.tr("Number of features processed")
